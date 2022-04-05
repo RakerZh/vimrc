@@ -219,8 +219,10 @@ else
 
         if [ -n "$BASH_VERSION" ]; then
           echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.bashrc
+          source ~/.bashrc
         elif [ -n "$ZSH_VERSION" ]; then
           echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.zshrc
+          source ~/.zshrc
         else
           echo "add go to your PATH! "
         fi
@@ -231,8 +233,10 @@ else
 
         if [ -n "$BASH_VERSION" ]; then
           echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.bashrc
+          source ~/.bashrc
         elif [ -n "$ZSH_VERSION" ]; then
           echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.zshrc
+          source ~/.zshrc
         else
           echo "add go to your PATH! "
         fi
