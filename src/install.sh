@@ -195,6 +195,57 @@ install_dnf() {
     install_coc_plugins
 }
 
+install_yum() {
+
+install_status=false
+
+if ! command -v go version &> /dev/null; then
+  echo "golang could not be found in your PATH"
+else
+  go_version=$(go version | awk '{print $3}')
+  if $go_version < "1.13"; then
+    echo "go version too low"
+  else
+    install_status=true
+  fi
+fi
+
+if $install_status ; then
+    echo "go version is ok"
+else
+    echo "go version is not ok"
+    osname=$(uname -s)
+    arch=$(uname -m)
+    if "$osname"=="Linux"; then
+      echo "installing golang in Linux"
+      if "$arch"=="x86_64"; then
+        wget https://go.dev/dl/go1.18.linux-amd64.tar.gz
+        tar -C /usr/local -xzf go1.18 linux-amd64.tar.gz
+        echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.bashrc
+        source ~/.bashrc
+        echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.zshrc
+        source ~/.zshrc
+      elif "$arch"=="aarch64"; then
+        wget https://go.dev/dl/go1.18.linux-arm64.tar.gz
+        tar -C /usr/local -xzf go1.18 linux-arm64.tar.gz
+        echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.bashrc
+        source ~/.bashrc
+        echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.zshrc
+        source ~/.zshrc
+      else
+            echo "golang is not supported on this architecture"
+      fi
+    else
+        echo "golang installer is not supported on this operating system"
+    fi
+fi
+
+sudo yum install gcc make cmake gcc-c++
+sudo yum install clang clang-devel
+
+
+}
+
 install_zypper() {
     sudo zypper in --no-confirm fzf ripgrep ccls nodejs 
     
