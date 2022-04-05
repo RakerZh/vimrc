@@ -216,11 +216,27 @@ else
     if [ "$(uname -m)" == "x86_64" ]; then
         wget https://go.dev/dl/go1.18.linux-amd64.tar.gz
         sudo tar -C /usr/local -xzf go1.18.linux-amd64.tar.gz
-        export PATH=$PATH:/usr/local/go/bin
+
+        if [ -n "$BASH_VERSION" ]; then
+          echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.bashrc
+        elif [ -n "$ZSH_VERSION" ]; then
+          echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.zshrc
+        else
+          echo "add go to your PATH! "
+        fi
+
     elif [ "$(uname -m)" == "aarch64" ]; then
         wget https://go.dev/dl/go1.18.linux-arm64.tar.gz
         sudo tar -C /usr/local -xzf go1.18.linux-arm64.tar.gz
-        export PATH=$PATH:/usr/local/go/bin
+
+        if [ -n "$BASH_VERSION" ]; then
+          echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.bashrc
+        elif [ -n "$ZSH_VERSION" ]; then
+          echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.zshrc
+        else
+          echo "add go to your PATH! "
+        fi
+
     else
         echo "golang is not supported on this architecture"
     fi
