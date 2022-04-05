@@ -197,52 +197,70 @@ install_dnf() {
 
 install_yum() {
 
-install_status=false
+install_go=true
 
 if ! command -v go version &> /dev/null; then
+  install_go=false
   echo "golang could not be found in your PATH"
+elif [ $(go version | awk '{$3 < 1.13 }') ]; then
+  install_go=false
+  echo "go version too low"
 else
-  go_version=$(go version | awk '{print $3}')
-  if $go_version < "1.13"; then
-    echo "go version too low"
-  else
-    install_status=true
-  fi
+  install_go=true
 fi
 
-if $install_status ; then
+if "$install_go" = true; then
     echo "go version is ok"
 else
     echo "go version is not ok"
-    osname=$(uname -s)
-    arch=$(uname -m)
-    if "$osname"=="Linux"; then
-      echo "installing golang in Linux"
-      if "$arch"=="x86_64"; then
+    echo "installing golang in Linux"
+    if [ "$(uname -m)" == "x86_64" ]; then
         wget https://go.dev/dl/go1.18.linux-amd64.tar.gz
-        tar -C /usr/local -xzf go1.18 linux-amd64.tar.gz
-        echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.bashrc
-        source ~/.bashrc
-        echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.zshrc
-        source ~/.zshrc
-      elif "$arch"=="aarch64"; then
+        sudo tar -C /usr/local -xzf go1.18.linux-amd64.tar.gz
+        if [ -n "`$SHELL -c 'echo $BASH_VERSION'`" ]; then
+          echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.bashrc
+          source ~/.bashrc
+        elif [ -n "`$SHELL -c 'echo $ZSH_VERSION'`" ]; then
+          echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.zshrc
+          source ~/.zshrc
+        else
+          echo "add it manually"
+        fi
+    elif [ "$(uname -m)" == "aarch64" ]; then
         wget https://go.dev/dl/go1.18.linux-arm64.tar.gz
-        tar -C /usr/local -xzf go1.18 linux-arm64.tar.gz
-        echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.bashrc
-        source ~/.bashrc
-        echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.zshrc
-        source ~/.zshrc
-      else
-            echo "golang is not supported on this architecture"
-      fi
+        sudo tar -C /usr/local -xzf go1.18.linux-arm64.tar.gz
+        if [ -n "`$SHELL -c 'echo $ZSH_VERSION'`" ]; then
+           # assume Zsh
+            echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.zshrc
+            source ~/.zshrc
+        elif [ -n "`$SHELL -c 'echo $BASH_VERSION'`" ]; then
+           # assume Bash
+            echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.bashrc
+            source ~/.bashrc
+        else
+          echo "add it manually"
+        fi
     else
-        echo "golang installer is not supported on this operating system"
+        echo "golang is not supported on this architecture"
     fi
 fi
+
+# node_version=$(node -v)
+#   version=$( node -v)
+#    MAJOR=$(echo $version | cut -d. -f1)
+#    MINOR=$(echo $version | cut -d. -f2)
+#    if [[ "$MAJOR" < "v12" ]] && [[ "$MINOR" < "22" ]]; then
+    #    curl -sL install-node.vercel.app/lts | bash
+#        echo "1"
+#    else
+#        echo "2"
+# fi
+
 
 sudo yum install gcc make cmake gcc-c++
 sudo yum install clang clang-devel
 
+install_any
 
 }
 
@@ -301,6 +319,8 @@ elif [ $distro == "fedora" ]; then
     install_dnf
 elif [ $distro == "openSUSE" ]; then
     install_zypper
+elif [ $distro == "CentOS" ]; then
+    install_yum
 else
     # TODO: add more Linux distros here..
     # TODO: how to detect Windows?
