@@ -32,8 +32,7 @@ if [ "x$VIM" == "x" ]; then
         exit 1
     fi
 fi
-echo "-- Installing for vim executable: $VIM"
-
+echo "-- Installing for vim executable: $VIM" 
 
 get_linux_distro() {
     if grep -Eq "Ubuntu" /etc/*-release; then
@@ -217,50 +216,44 @@ else
     if [ "$(uname -m)" == "x86_64" ]; then
         wget https://go.dev/dl/go1.18.linux-amd64.tar.gz
         sudo tar -C /usr/local -xzf go1.18.linux-amd64.tar.gz
-        if [ -n "`$SHELL -c 'echo $BASH_VERSION'`" ]; then
-          echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.bashrc
-          source ~/.bashrc
-        elif [ -n "`$SHELL -c 'echo $ZSH_VERSION'`" ]; then
-          echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.zshrc
-          source ~/.zshrc
-        else
-          echo "add it manually"
-        fi
+        export PATH=$PATH:/usr/local/go/bin
     elif [ "$(uname -m)" == "aarch64" ]; then
         wget https://go.dev/dl/go1.18.linux-arm64.tar.gz
         sudo tar -C /usr/local -xzf go1.18.linux-arm64.tar.gz
-        if [ -n "`$SHELL -c 'echo $ZSH_VERSION'`" ]; then
-           # assume Zsh
-            echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.zshrc
-            source ~/.zshrc
-        elif [ -n "`$SHELL -c 'echo $BASH_VERSION'`" ]; then
-           # assume Bash
-            echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.bashrc
-            source ~/.bashrc
-        else
-          echo "add it manually"
-        fi
+        export PATH=$PATH:/usr/local/go/bin
     else
         echo "golang is not supported on this architecture"
     fi
 fi
 
-# node_version=$(node -v)
-#   version=$( node -v)
-#    MAJOR=$(echo $version | cut -d. -f1)
-#    MINOR=$(echo $version | cut -d. -f2)
-#    if [[ "$MAJOR" < "v12" ]] && [[ "$MINOR" < "22" ]]; then
-    #    curl -sL install-node.vercel.app/lts | bash
+if ! command -v node -v &> /dev/null; then
+      sudo dnf module install nodejs:12
+else
+    node_version=$(node -v)
+    version=$( node -v)
+    MAJOR=$(echo $version | cut -d. -f1)
+    MINOR=$(echo $version | cut -d. -f2)
+    if [[ "$MAJOR" < "v12" ]] && [[ "$MINOR" < "22" ]]; then
+	sudo dnf module install nodejs:12
 #        echo "1"
-#    else
-#        echo "2"
-# fi
-
+    else
+        echo "2"
+    fi
+fi
 
 sudo yum install gcc make cmake gcc-c++
 sudo yum install clang clang-devel
+if ! command -v cargo -v &> /dev/null; then
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+    source $HOME/.cargo/env
+fi
 
-install_any
+    install_fzf_from_source
+    install_ripgrep_from_source
+    install_ccls_from_source
+    install_vimrc
+    install_coc_plugins
+
 
 }
 
